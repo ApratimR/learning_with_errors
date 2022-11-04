@@ -43,6 +43,7 @@ class keygen:
             equation_set.append(temp_eq)
 
         key_set["public_key"] = equation_set
+        key_set['ring_size'] = size
         return json.dumps(key_set)
 
 # data = int('0b'+data,2)
@@ -50,13 +51,45 @@ class keygen:
 
 class encrypt():
     @staticmethod
-    def encrypt(data:str,public_key:List[List[int]]):
+    def encrypt(data:str,public_key:List[List[int]],ring_size:int):
         
         data = bin(int.from_bytes(data.encode(), "big"))[2:]
         
-        encrypted_data = ""
+        encrypted_data = []
         
         for temp in data:
-            pass
+            encrypted_data.extend(encrypt.encrypt_bit(temp,public_key,ring_size))
+            
+        print(ring_size)
+        print(encrypted_data)
+
+    @staticmethod
+    def encrypt_bit(bit,public_key,ring_size):
+        equation_set_lenght=len(public_key)
+        equation_parameter_size = len(public_key[0])-1
+        
+        if bit == 0:
+            error = keygen.__gen_val(ring_size)//20
+        else:
+            error = secrets.choice(range((ring_size//2)-(ring_size//10),ring_size//2))
+        
+
+        selection_acceptable = True
+        while selection_acceptable :
+            selection_list = [secrets.randbelow(2) for _ in range(equation_set_lenght)]
+            if selection_list.count(1)==(equation_parameter_size):
+                selection_acceptable = False
+        
+        sum_array = [0]*(equation_parameter_size+1)
+        for temp in range(len(public_key)):
+            if selection_list[temp] == 1:
+                sum_array = [sum(value) for value in zip(sum_array,public_key[temp])]
+        
+        sum_array[-1] = sum_array[-1]+error
+
+        
+        sum_array = [(x)%ring_size for x in sum_array]
+
+        return sum_array
         
         
