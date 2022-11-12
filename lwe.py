@@ -59,9 +59,13 @@ class encrypt():
         
         for temp in data:
             encrypted_data.extend(encrypt.encrypt_bit(temp,public_key,ring_size))
-            
-        print(ring_size)
-        print(encrypted_data)
+        
+        payload = {}
+
+        payload['ring_size']= ring_size
+        payload['data']= encrypted_data
+        payload['count'] = "INSERT SOMETHING HERE"
+        print(payload)
 
     @staticmethod
     def encrypt_bit(bit,public_key,ring_size):
