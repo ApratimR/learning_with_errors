@@ -98,6 +98,9 @@ class decrypt:
     @staticmethod
     def decrypt(payload):
         if isinstance(payload,dict) and all(key in payload for key in ['ring_size','data','count']):
-            print("data present")
+            #ensure the size of data
+            data = payload['data']
+            count = payload['count']
+            print(len(data)%(count+1))
         pass
     
