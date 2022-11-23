@@ -35,16 +35,13 @@ class keygen:
                 temp_eq.append(temp_val)
                 eq_sol += temp_val * private_key_array[temp1]
 
-            temp_eq.append((eq_sol + (keygen.__gen_val(size) // 10)) % size)
+            temp_eq.append((eq_sol + (keygen.__gen_val(10))) % size)
             equation_set.append(temp_eq)
 
         key_set["public_key"] = equation_set
         key_set["ring_size"] = size
         return json.dumps(key_set)
 
-
-# data = int('0b'+data,2)
-# data = data.to_bytes((data.bit_length() + 7) // 8, 'big').decode()
 
 
 class encrypt:
@@ -54,7 +51,6 @@ class encrypt:
         data = bin(int.from_bytes(data.encode(), "big"))[2:]
 
         encrypted_data = []
-
         for temp in data:
             encrypted_data.extend(encrypt.encrypt_bit(temp, public_key, ring_size))
 
@@ -62,20 +58,22 @@ class encrypt:
         payload["ring_size"] = ring_size
         payload["data"] = encrypted_data
         payload["count"] = len(public_key[0]) - 1
-        return payload
+        return json.dumps(payload)
 
     @staticmethod
     def encrypt_bit(bit, public_key, ring_size):
         equation_set_lenght = len(public_key)
         equation_parameter_size = len(public_key[0]) - 1
 
-        if bit == 0:
-            error = keygen.__gen_val(ring_size) // 20
+        if bit == '0':
+            error = secrets.choice(
+                range(20)
+            )
         else:
             error = secrets.choice(
-                range((ring_size // 2) - (ring_size // 10), ring_size // 2)
+                range((ring_size // 2) - 20, ring_size // 2)
             )
-
+        
         selection_acceptable = True
         while selection_acceptable:
             selection_list = [secrets.randbelow(2) for _ in range(equation_set_lenght)]
@@ -96,11 +94,35 @@ class encrypt:
 
 class decrypt:
     @staticmethod
-    def decrypt(payload):
+    def decrypt(payload,private_key):
         if isinstance(payload,dict) and all(key in payload for key in ['ring_size','data','count']):
             #ensure the size of data
             data = payload['data']
-            count = payload['count']
-            print(len(data)%(count+1))
-        pass
+            count = payload['count']+1
+            ring_size = payload['ring_size']
+            equation_set = []
+            if len(data)%(count) == 0:
+                for temp in range(len(data)//(count)):
+                    equation_set.append(data[temp*count : (temp+1)*count])
+                bin_data = ""
+                for temp in equation_set:
+                    bin_data += '1' if decrypt.solve_equation(private_key,temp,ring_size) else '0'
+                
+                bin_data = int('0b'+bin_data,2)
+                bin_data = bin_data.to_bytes((bin_data.bit_length() + 7) // 8, 'big').decode()
+                return bin_data
+            else:
+                raise Exception("Invalid equation set and lattice dimentions recived")
+
     
+    @staticmethod
+    def solve_equation(private_key,data,ring_size):
+        sum_actual = 0
+        error_sum = data[-1]
+        for temp in range(len(private_key)):
+            sum_actual += (private_key[temp]*data[temp])
+        
+        sum_actual = sum_actual % ring_size
+        error_amount = abs(error_sum-sum_actual)
+        
+        return abs(0 - error_amount) > abs(ring_size//2 - error_amount)
