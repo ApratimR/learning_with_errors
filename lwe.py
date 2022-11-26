@@ -12,10 +12,10 @@ class keygen:
     @staticmethod
     def keygen(parameters: int, size: int):
 
-        if not (3 < parameters and parameters <= 10):
+        if not (3 < parameters and parameters <= 50):
             raise Exception("Parameter value invalid")
 
-        if not (512 < size and size <= 2048):
+        if not (512 < size and size <= 10240):
             raise Exception("size value invalid")
         private_key_array = [0] * parameters
         for temp in range(parameters):
@@ -110,7 +110,7 @@ class decrypt:
                 
                 bin_data = int('0b'+bin_data,2)
                 bin_data = bin_data.to_bytes((bin_data.bit_length() + 7) // 8, 'big').decode()
-                return bin_data
+                return json.dumps(bin_data)
             else:
                 raise Exception("Invalid equation set and lattice dimentions recived")
 
@@ -124,5 +124,7 @@ class decrypt:
         
         sum_actual = sum_actual % ring_size
         error_amount = abs(error_sum-sum_actual)
-        
-        return abs(0 - error_amount) > abs(ring_size//2 - error_amount)
+        error_amount = abs(error_amount - (ring_size//2))
+        error_percentage = (error_amount/(ring_size//2))*100
+        # print(error_percentage)
+        return error_percentage < 50
