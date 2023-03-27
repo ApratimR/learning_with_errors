@@ -12,16 +12,16 @@ class keygen:
     @staticmethod
     def keygen(parameters: int, size: int):
 
-        if not (3 < parameters and parameters <= 50):
+        if not (3 < parameters and parameters <= 30):
             raise Exception("Parameter value invalid")
 
-        if not (512 < size and size <= 10240):
+        if not (1024 <= size ):
             raise Exception("size value invalid")
         private_key_array = [0] * parameters
         for temp in range(parameters):
             private_key_array[temp] = keygen.__gen_val(size)
 
-        key_set = {"private_key": private_key_array}
+        key_set_private = {"private_key": private_key_array,'ring_size':size}
 
         equations_to_generate = 2 * parameters
 
@@ -38,16 +38,21 @@ class keygen:
             temp_eq.append((eq_sol + (keygen.__gen_val(10))) % size)
             equation_set.append(temp_eq)
 
-        key_set["public_key"] = equation_set
-        key_set["ring_size"] = size
-        return json.dumps(key_set)
+        key_set_public = {}
+        key_set_public["public_key"] = equation_set
+        key_set_public["ring_size"] = size
+        
+        key_set_private = json.dumps(key_set_private)
+        key_set_public = json.dumps(key_set_public)
+        return key_set_private,key_set_public
 
 
 
 class encrypt:
     @staticmethod
-    def encrypt(data: str, public_key: List[List[int]], ring_size: int):
-
+    def encrypt(data: str, public_key):
+        ring_size = public_key['ring_size']
+        public_key = public_key['public_key']
         data = bin(int.from_bytes(data.encode(), "big"))[2:]
 
         encrypted_data = []
@@ -55,9 +60,7 @@ class encrypt:
             encrypted_data.extend(encrypt.encrypt_bit(temp, public_key, ring_size))
 
         payload = {}
-        payload["ring_size"] = ring_size
         payload["data"] = encrypted_data
-        payload["count"] = len(public_key[0]) - 1
         return json.dumps(payload)
 
     @staticmethod
@@ -67,11 +70,11 @@ class encrypt:
 
         if bit == '0':
             error = secrets.choice(
-                range(20)
+                range(ring_size//50)
             )
         else:
             error = secrets.choice(
-                range((ring_size // 2) - 20, ring_size // 2)
+                range((ring_size // 2) - ring_size//50, ring_size // 2)
             )
         
         selection_acceptable = True
@@ -95,11 +98,12 @@ class encrypt:
 class decrypt:
     @staticmethod
     def decrypt(payload,private_key):
-        if isinstance(payload,dict) and all(key in payload for key in ['ring_size','data','count']):
+        ring_size = private_key['ring_size']
+        private_key = private_key['private_key']
+        count = len(private_key)+1
+        if isinstance(payload,dict) and all(key in payload for key in ['data']):
             #ensure the size of data
             data = payload['data']
-            count = payload['count']+1
-            ring_size = payload['ring_size']
             equation_set = []
             if len(data)%(count) == 0:
                 for temp in range(len(data)//(count)):
@@ -126,5 +130,5 @@ class decrypt:
         error_amount = abs(error_sum-sum_actual)
         error_amount = abs(error_amount - (ring_size//2))
         error_percentage = (error_amount/(ring_size//2))*100
-        # print(error_percentage)
+        print(error_percentage)
         return error_percentage < 50
