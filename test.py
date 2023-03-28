@@ -5,8 +5,12 @@ import secrets
 # genetaring a test string to encrypt
 original_string = secrets.token_hex(16)
 
+
+parameter_value = secrets.randbelow(20)+9
+parameter_size = secrets.randbelow(10000000000000000000)+1024
+
 # generating the keys for encryption process
-private_key,public_key = lwe.keygen.keygen(30,1024)
+private_key,public_key = lwe.keygen.keygen(parameter_value,parameter_size)
 
 # converting string data to json
 private_key = json.loads(private_key)

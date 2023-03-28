@@ -130,5 +130,4 @@ class decrypt:
         error_amount = abs(error_sum-sum_actual)
         error_amount = abs(error_amount - (ring_size//2))
         error_percentage = (error_amount/(ring_size//2))*100
-        print(error_percentage)
         return error_percentage < 50
