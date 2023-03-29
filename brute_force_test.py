@@ -1,7 +1,7 @@
 import lwe
 import json
 import secrets
-from multiprocessing import Process,freeze_support
+from multiprocessing import Process
 
 
 def function():
@@ -9,8 +9,11 @@ def function():
     for temp in range(50):
         original_string = secrets.token_hex(16)
 
+        parameter_value = secrets.randbelow(26)+4
+        parameter_size = secrets.randbelow(10000)+1024
+
         # generating the keys for encryption process
-        private_key,public_key = lwe.keygen.keygen(30,1024)
+        private_key,public_key = lwe.keygen.keygen(parameter_value,parameter_size)
 
         # converting string data to json
         private_key = json.loads(private_key)
@@ -30,21 +33,20 @@ def function():
             print("Process Done")
         
 if __name__ == "__main__":
-    freeze_support()
-    p1 = Process(function())
-    p2 = Process(function())
-    p3 = Process(function())
-    p4 = Process(function())
-
-    p1.start()
-    p2.start()
-    p3.start()
-    p4.start()
     
-    p1.join()
-    p2.join()
-    p3.join()
-    p4.join()
+    processes = []
+
+    for temp in range(3):
+        processes.append(Process(target = function))
+
+    for pr in processes:
+        pr.start()
+
+    for pr in processes:
+        pr.join()
+
+    print("All Process Compleated")
+    
 
         
         
