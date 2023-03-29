@@ -2,12 +2,14 @@
 
 A Lattice(LAT) based Asymetric public-key encryption algorithm based on learning with errors(LWE) problem.
 
-The amount of error introdcued during the encryption process is around 4 percent of the key space size for each dimension increment thus deriving the name LAT-LWE-4.
+It uses methods which are proposed to be secure against cryptanalytic attack by a quantum computer.
 
-#### How to use
+The Name LWE-4 is derived from the max half-error amount percentage during the key generation which comes to around 4 percet thus deriving the name LWE-4
+
+## How to use
 
 ```python
-import lwe
+import LWE4 as lwe
 import json
 import secrets
 
@@ -32,7 +34,9 @@ if original_string != decrypted_string:
     print("ERROR",private_key,public_key)
 ```
 
-# Todo
+You can directly look into the test.py or brute_force_test.py files from the repo to directly start the testing after cloning the repo.
+Or you can directly use the Jupyter notebook for testing/playing around in the playground which i had been using for my development preocess.
 
-* implement checks for any fault
-* set and test the keygen thresholds
+## NOTE !
+
+* This is still an indevelopment project and shouldn't be used for any production usecase.

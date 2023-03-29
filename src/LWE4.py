@@ -1,6 +1,5 @@
 import secrets
 import json
-from typing import List
 
 
 class keygen:
@@ -35,7 +34,7 @@ class keygen:
                 temp_eq.append(temp_val)
                 eq_sol += temp_val * private_key_array[temp1]
 
-            temp_eq.append((eq_sol + (keygen.__gen_val(10))) % size)
+            temp_eq.append((eq_sol + (keygen.__gen_val(int(size * 0.008)))) % size)
             equation_set.append(temp_eq)
 
         key_set_public = {}

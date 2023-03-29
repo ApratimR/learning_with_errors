@@ -1,4 +1,4 @@
-import lwe
+import src.LWE4 as lwe
 import json
 import secrets
 
